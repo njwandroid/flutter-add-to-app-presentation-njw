@@ -5,253 +5,489 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flutter Add-to-App: Integrating into Native Apps</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
             scroll-behavior: smooth;
+            background-color: #f8fafc; 
         }
         .slide {
-            min-height: 90vh; /* Slightly increased min-height */
-            padding: 5rem 2rem; /* Increased padding */
+            min-height: 90vh; /* Default min-height for other slides */
+            padding: 4rem 2rem; /* Default padding for other slides */
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: center; /* Default for other slides */
             align-items: center;
             text-align: center;
-            border-bottom: 1px solid #e5e7eb; /* Light border between slides */
+            border-bottom: 1px solid #e2e8f0; 
+            position: relative; 
         }
         .slide:last-child {
             border-bottom: none;
         }
         .slide-title {
-            font-size: 2.5rem; /* Slightly larger title */
-            font-weight: 700;
-            margin-bottom: 1.75rem; /* Adjusted margin */
-            color: #111827; 
+            font-size: 2.75rem; 
+            font-weight: 800; 
+            margin-bottom: 1rem; 
+            color: #1e293b; 
         }
         .slide-subtitle {
-            font-size: 1.375rem; /* Slightly larger subtitle */
+            font-size: 1.375rem; 
             font-weight: 500;
-            margin-bottom: 2.5rem; /* Adjusted margin */
-            color: #374151; 
-            max-width: 800px; /* Limit subtitle width */
+            margin-bottom: 2rem; 
+            color: #475569; 
+            max-width: 750px; 
         }
         .content-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Slightly larger minmax */
-            gap: 2.5rem; /* Increased gap */
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+            gap: 2rem; 
             width: 100%;
-            max-width: 1100px; /* Increased max width */
+            max-width: 1200px; 
         }
         .content-card {
             background-color: white;
-            padding: 2rem; /* Increased padding */
+            padding: 2rem 2.5rem; 
             border-radius: 0.75rem; 
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Softer shadow */
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.05);
             text-align: left;
             display: flex;
             flex-direction: column;
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
         }
         .content-card h3 {
-            font-size: 1.25rem; /* Larger card title */
-            font-weight: 600;
+            font-size: 1.35rem; 
+            font-weight: 700; 
             margin-bottom: 1rem; 
-            color: #1f2937;
+            color: #0f172a; 
             display: flex;
             align-items: center;
         }
-        .content-card h3 svg {
-            margin-right: 0.75rem; /* Space for icon */
+        .content-card h3 svg, .content-card h3 i { 
+            margin-right: 0.85rem; 
+            width: 24px; 
+            height: 24px;
         }
         .content-card p, .content-card ul {
-            font-size: 1rem; /* Larger base text */
-            color: #4b5563;
-            line-height: 1.7; /* Increased line height */
+            font-size: 1rem; 
+            color: #334155; 
+            line-height: 1.75; 
         }
         .content-card ul {
-            list-style-position: outside; /* Better alignment */
-            padding-left: 1.25rem; /* Indent for bullets */
-            margin-top: 0.5rem;
+            list-style-type: disc; 
+            list-style-position: outside; 
+            padding-left: 1.5rem; 
+            margin-top: 0.75rem;
         }
         .content-card li {
-            margin-bottom: 0.5rem; /* More space between list items */
+            margin-bottom: 0.6rem; 
+        }
+        .content-card a {
+            color: #2563eb; 
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.2s ease, text-decoration 0.2s ease;
+        }
+        .content-card a:hover {
+            color: #1d4ed8; 
+            text-decoration: underline;
         }
         .code-snippet {
-            background-color: #2d3748; /* Darker blue-gray */
-            color: #e2e8f0; /* Lighter text */
-            padding: 1.25rem;
+            background-color: #1e293b; 
+            color: #e2e8f0; 
+            padding: 1.25rem 1.5rem;
             border-radius: 0.5rem; 
             font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
             font-size: 0.9rem; 
             overflow-x: auto;
             text-align: left;
             margin-top: 1rem;
-            border: 1px solid #4a5568; /* Subtle border */
+            border: 1px solid #334155; 
         }
+        
         .nav-bar {
             position: sticky;
             top: 0;
-            background-color: rgba(255, 255, 255, 0.85); /* Slightly more transparent */
-            backdrop-filter: blur(12px); /* Increased blur */
-            padding: 1rem 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            background-color: #0f172a; 
+            backdrop-filter: blur(16px); 
+            padding: 0.5rem 1.5rem; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
             z-index: 50;
             display: flex;
-            justify-content: center;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
-            gap: 0.5rem 1rem; /* Adjust gap for wrapping */
+            align-items: center; 
+            justify-content: space-between; 
+        }
+        .nav-brand-logos {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem; 
+        }
+        .nav-brand-logos img {
+            height: 24px; 
+            width: auto;
+        }
+        .nav-links-container {
+            display: flex;
+            flex-wrap: wrap; 
+            gap: 0.25rem 0.5rem; 
         }
         .nav-link {
-            color: #374151;
-            font-weight: 500;
-            padding: 0.6rem 1.2rem; /* Slightly more padding */
+            color: #cbd5e1; 
+            font-weight: 500; 
+            padding: 0.6rem 0.8rem; 
             border-radius: 0.375rem; 
-            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, transform 0.1s ease;
+            transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            font-size: 0.9rem; 
+            border-bottom: 2px solid transparent; 
         }
         .nav-link:hover {
-            background-color: #e5e7eb; 
-            color: #111827;
-            transform: translateY(-1px); /* Subtle hover effect */
-        }
-        .diagram-placeholder {
-            width: 100%;
-            max-width: 700px; /* Increased max-width */
-            min-height: 350px; /* Increased min-height */
-            background-color: #f9fafb; /* Very light gray */
-            border: 2px dashed #d1d5db; 
-            display: flex;
-            flex-direction: column; /* Allow multiple lines */
-            justify-content: center;
-            align-items: center;
-            border-radius: 0.75rem; /* More rounded */
-            margin: 2rem auto; /* Increased margin */
-            color: #6b7280; 
-            padding: 1.5rem;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-        .button-primary {
-            background-color: #2563eb; 
-            color: white;
-            padding: 0.85rem 1.75rem; /* More padding */
-            border-radius: 0.5rem;
-            font-weight: 600; /* Bolder */
-            transition: background-color 0.2s ease-in-out, transform 0.1s ease;
-            display: inline-block;
-            margin-top: 2rem; /* Increased margin */
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-        .button-primary:hover {
-            background-color: #1d4ed8; 
-            transform: translateY(-2px); /* More pronounced hover */
+            color: #f8fafc; 
+            border-bottom-color: #3b82f6; 
         }
 
-        /* Mobile responsiveness adjustments */
+        .button-primary {
+            background-image: linear-gradient(to right, #3b82f6, #60a5fa); 
+            color: white;
+            padding: 0.85rem 2rem; 
+            border-radius: 0.5rem;
+            font-weight: 600; 
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-top: 2rem; 
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            border: none;
+        }
+        .button-primary:hover {
+            background-image: linear-gradient(to right, #2563eb, #3b82f6);
+            transform: translateY(-3px) scale(1.02); 
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        /* UPDATED Hero Section Specific Styles for Slide 1 */
+        #slide1 {
+            height: 212px; /* Specific pixel height - ADJUST THIS VALUE FOR TRIAL AND ERROR */
+            min-height: unset; /* Override default .slide min-height */
+            padding-top: 1.5rem; 
+            padding-bottom: 2.5rem; 
+            justify-content: flex-start; 
+            background-color: #075985; 
+            background-image: 
+                radial-gradient(at 15% 25%, hsla(215, 98%, 61%, 0.7) 0px, transparent 40%), 
+                radial-gradient(at 85% 15%, hsla(195, 98%, 72%, 0.6) 0px, transparent 40%),
+                radial-gradient(at 50% 85%, hsla(196, 98%, 62%, 0.5) 0px, transparent 50%),
+                radial-gradient(at 5% 15%, hsla(210, 98%, 61%, 0.6) 0px, transparent 40%),
+                radial-gradient(at 90% 90%, hsla(201, 98%, 60%, 0.7) 0px, transparent 50%);
+            color: white;
+            overflow: hidden; 
+            align-items: stretch; 
+        }
+        .slide1-content-wrapper {
+            display: flex;
+            width: 100%;
+            max-width: 1200px; 
+            align-items: flex-start; 
+            justify-content: flex-start; 
+            flex-grow: 0; 
+        }
+        .hero-corner-graphic {
+            transform: scale(0.4); 
+            transform-origin: top left;
+            z-index: 5; 
+            margin-top: -2.5rem; 
+            margin-left: -2rem; 
+            flex-shrink: 0; 
+        }
+        .hero-text-content {
+            text-align: left; 
+            z-index: 10; 
+            position: relative;
+            flex-grow: 1; 
+            padding-left: 0rem; 
+            margin-top: 0; 
+        }
+        .hero-text-content .slide-title { 
+            color: white; 
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            font-size: 3.5rem; 
+            line-height: 1.1;
+            margin-bottom: 0.5rem; 
+        }
+        .hero-text-content .slide-subtitle-main { 
+            color: #e0f2fe; 
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.15);
+            font-size: 1.25rem; 
+            line-height: 1.3;
+            margin-bottom: 0.5rem;
+        }
+        .hero-text-content .slide-subtitle-secondary { 
+            font-size: 1.05rem; 
+            font-weight: 500; 
+            color: #bae6fd; 
+        }
+        /* END UPDATED Hero Section Styling */
+        
+        /* Styles for the "Dash wearing helmet" component on Slide 1 */
+        #android-flutter-showcase {
+            /* Styles for the component itself, if any beyond Tailwind */
+        }
+        .dash-mascot-img { 
+            object-fit: contain;
+            width: 190px; 
+            height: auto;
+        }
+        .bugdroid-helmet-img { 
+            width: 60px;  
+            height: auto;
+        }
+        .flutter-on-helmet-logo { 
+            width: 10px; 
+            height: auto;
+            filter: none; 
+        }
+        @media (min-width: 640px) { 
+            .dash-mascot-img { width: 255px; }
+            .bugdroid-helmet-img { width: 78px; }
+            .flutter-on-helmet-logo { width: 14px; }
+        }
+        .android-head-svg {
+            max-width: 100%;
+            height: auto;
+        }
+        #android-flutter-showcase details > summary { 
+            list-style: none;
+            cursor: pointer;
+        }
+        #android-flutter-showcase details > summary::-webkit-details-marker { 
+            display: none;
+        }
+        #android-flutter-showcase details summary::after { 
+            content: ' ▼';
+            font-size: 0.7em;
+            margin-left: 0.3rem;
+        }
+        #android-flutter-showcase details[open] summary::after { 
+            content: ' ▲';
+        }
+        .dash-with-helmet-container {
+            position: relative; 
+            display: flex; 
+            justify-content: center;
+            align-items: center; 
+            margin-bottom: 1rem; 
+            height: 270px; 
+        }
+        .dash-base-container { z-index: 10; }
+        .bugdroid-helmet-unit {
+            position: absolute;
+            top: 18%;  
+            left: 52%; 
+            transform: translateX(-50%);
+            z-index: 20; 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+        }
+        .flutter-logo-on-helmet-container { 
+            position: absolute;
+            top: 45%; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 25; 
+        }
+        /* End of user's component styles */
+
+        .architecture-diagram-container {
+            width: 100%;
+            max-width: 900px;
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            margin: 2rem auto;
+        }
+        .architecture-diagram-container svg text {
+            font-family: 'Inter', sans-serif;
+            fill: #334155;
+        }
+        .architecture-diagram-container svg .label { font-size: 13px; font-weight: 600; }
+        .architecture-diagram-container svg .sub-label { font-size: 11px; fill: #64748b; }
+        .architecture-diagram-container svg .arrow-line { stroke: #60a5fa; stroke-width: 2; }
+        .architecture-diagram-container svg .arrow-head { fill: #60a5fa; }
+        .architecture-diagram-container svg .box { stroke: #94a3b8; stroke-width: 1.5; rx: 6; }
+
         @media (max-width: 768px) {
-            .slide {
-                padding: 3rem 1rem; 
+            #slide1 {
+                height: auto; /* Allow content to define height on mobile */
+                min-height: 50vh; /* Still provide some min height for visual */
+                padding-top: 1.5rem;
+                padding-bottom: 1.5rem;
             }
-            .slide-title {
-                font-size: 1.875rem; 
+            .slide1-content-wrapper {
+                flex-direction: column; 
+                align-items: center;
+                text-align: center; 
             }
-            .slide-subtitle {
-                font-size: 1.125rem; 
+            .hero-corner-graphic {
+                position: static; 
+                transform: scale(0.5); 
+                margin-bottom: 0.5rem; 
+                margin-left: 0; 
+                margin-top: 0; 
             }
-            .content-grid {
-                grid-template-columns: 1fr; /* Single column on mobile */
+            .hero-text-content {
+                text-align: center; 
+                padding-left: 0; 
             }
-            .nav-bar {
-                justify-content: space-around;
+            .hero-text-content .slide-title { font-size: 2.75rem; } 
+            .hero-text-content .slide-subtitle-main { font-size: 1.1rem; }
+            .hero-text-content .slide-subtitle-secondary { font-size: 0.95rem; }
+            
+            .slide { padding: 2rem 1rem; min-height: auto; } 
+            .slide-title { font-size: 2rem; } 
+            .slide-subtitle { font-size: 1.125rem; }
+            .content-grid { grid-template-columns: 1fr; }
+            .nav-bar { 
+                flex-direction: column; 
+                align-items: center; 
+                padding: 0.75rem 1rem;
             }
-            .nav-link {
-                 padding: 0.5rem 0.8rem;
-                 font-size: 0.9rem;
-            }
+            .nav-brand-logos { margin-bottom: 0.5rem; }
+            .nav-links-container { justify-content: center; width: 100%; }
+            .nav-link { padding: 0.5rem 0.6rem; font-size: 0.85rem; }
+            .architecture-diagram-container { padding: 1rem; }
+            .architecture-diagram-container svg .label { font-size: 11px; }
+            .architecture-diagram-container svg .sub-label { font-size: 9px; }
+        }
+        @media (max-width: 480px) {
+            .nav-links-container { gap: 0.1rem 0.2rem; }
+            .nav-link { padding: 0.5rem 0.4rem; font-size: 0.8rem; }
+            .hero-corner-graphic { transform: scale(0.4); }
+            .hero-text-content .slide-title { font-size: 2.25rem; }
+            .hero-text-content .slide-subtitle-main { font-size: 1rem; }
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="text-slate-800">
 
     <nav class="nav-bar">
-        <a href="#slide1" class="nav-link">Intro</a>
-        <a href="#slide2" class="nav-link">Why Add-to-App?</a>
-        <a href="#slide3" class="nav-link">Core "How"</a>
-        <a href="#slide4" class="nav-link">Architecture</a>
-        <a href="#slide5" class="nav-link">POC / Demo</a>
-        <a href="#slide6" class="nav-link">Next Steps</a>
+        <div class="nav-brand-logos">
+            <img src="https://developer.android.com/static/images/brand/android-head_3D.svg" alt="Android Logo" title="Android">
+            <img src="https://storage.googleapis.com/cms-storage-bucket/4fd5520fe28ebf839174.svg" alt="Flutter Logo" title="Flutter">
+        </div>
+        <div class="nav-links-container">
+            <a href="#slide1" class="nav-link">Intro</a>
+            <a href="#slide2" class="nav-link">Why</a>
+            <a href="#slide3" class="nav-link">How</a>
+            <a href="#slide4" class="nav-link">Arch</a>
+            <a href="#slide5" class="nav-link">POC</a> 
+            <a href="#slide6" class="nav-link">Next</a>
+        </div>
     </nav>
 
-    <section id="slide1" class="slide bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">Flutter Add-to-App</h1>
-        <p class="text-xl md:text-2xl lg:text-3xl font-light mb-10">Integrating Flutter Incrementally into Native iOS & Android</p>
-        <p class="text-lg md:text-xl">Technical Deep Dive for Experienced Teams</p>
-    </section>
+    <section id="slide1" class="slide">
+        <div class="slide1-content-wrapper">
+            <div class="hero-corner-graphic">
+                <div id="android-flutter-showcase" class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl flex flex-col items-center justify-center"> 
+                    <div class="dash-with-helmet-container">
+                        <div class="dash-base-container transition-transform duration-300 ease-in-out hover:scale-105" title="Dash">
+                            <img src="https://storage.googleapis.com/cms-storage-bucket/780e0e64d323aad2cdd5.png" alt="Flutter Dash Mascot from flutter.dev/brand" class="dash-mascot-img rounded-md">
+                        </div>
+                        <div class="bugdroid-helmet-unit transition-transform duration-300 ease-in-out hover:rotate-[-5deg] hover:scale-110" title="Bugdroid Helmet">
+                            <img src="https://developer.android.com/static/images/brand/android-head_3D.svg" alt="Android Robot Head as Helmet" class="bugdroid-helmet-img android-head-svg">
+                            <div class="flutter-logo-on-helmet-container">
+                                <img src="https://storage.googleapis.com/cms-storage-bucket/4fd5520fe28ebf839174.svg" alt="Flutter Logo on Helmet" class="flutter-on-helmet-logo">
+                            </div>
+                        </div>
+                    </div>
+                    <details class="w-full max-w-xs sm:max-w-sm">
+                        <summary class="text-xs text-gray-500 hover:text-gray-700 focus:outline-none text-center py-2">
+                            Logo usage info
+                        </summary>
+                        <p class="disclaimer text-[9px] sm:text-[11px] text-gray-400 text-center max-w-md leading-relaxed mt-2 px-2">
+                            The Android robot (developer.android.com/distribute/marketing-tools/brand-guidelines) is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License. The Flutter logo and Dash character (flutter.dev/brand) are trademarks of Google LLC. This visual is for illustrative fun and does not imply endorsement by Google.
+                        </p>
+                    </details>
+                </div>
+            </div>
 
-    <section id="slide2" class="slide">
-        <h2 class="slide-title">The Strategic "Why" (Briefly)</h2>
-        <p class="slide-subtitle">While you know Flutter's strengths, add-to-app offers specific strategic advantages for existing native codebases.</p>
-        <div class="content-grid">
-            <div class="content-card">
-                <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-7 h-7 text-blue-500"><path fill-rule="evenodd" d="M15.312 5.312a.75.75 0 010 1.06L8.837 12.85c-.14.141-.33.22-.53.22s-.39-.079-.53-.22L4.688 9.756a.75.75 0 011.06-1.06l2.5 2.5 5.994-5.994a.75.75 0 011.06 0z" clip-rule="evenodd" /></svg>Leverage Existing Investment</h3>
-                <p>Preserve stable native features and business logic while introducing Flutter for new UIs or feature modules.</p>
-            </div>
-            <div class="content-card">
-                <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-7 h-7 text-green-500"><path d="M10.75 16.82A7.5 7.5 0 103.18 9.25a.75.75 0 000 1.5A6 6 0 1110.75 4.82v2.43a.75.75 0 001.5 0V3.5a.75.75 0 00-.75-.75h-3.75a.75.75 0 000 1.5h2.43z" /><path d="M8.25 8.25a.75.75 0 000 1.5h3.5a.75.75 0 000-1.5h-3.5z" /></svg>Targeted Modernization</h3>
-                <p>Incrementally replace specific native screens or flows with Flutter, focusing on areas needing UI/UX uplift or faster iteration.</p>
-            </div>
-            <div class="content-card">
-                <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-7 h-7 text-purple-500"><path fill-rule="evenodd" d="M12.25 3.197a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zm2.506.67a.75.75 0 01.922-.396l1.062.53a.75.75 0 01-.395.923l-1.061-.531a.75.75 0 01-.528-.526zm-4.633-.396a.75.75 0 01.923.396l-.531 1.062a.75.75 0 01-.923-.396l.53-1.061zm-.396 4.632a.75.75 0 01.526.528l-.53 1.06a.75.75 0 01-.924-.395l.531-1.061a.75.75 0 01.392-.132zM4.133 6.397a.75.75 0 01.396.923l-.53 1.062a.75.75 0 01-.924-.396l.531-1.061a.75.75 0 01.527-.528zM10 6.5A3.5 3.5 0 0113.5 10H16a6 6 0 10-5.293 5.803.75.75 0 01.027-.024V10A3.5 3.5 0 0110 6.5zM11.5 10a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" clip-rule="evenodd" /></svg>Unified Dev Experience (for new parts)</h3>
-                <p>Utilize Flutter's developer experience for new modules, potentially improving team velocity for those specific parts.</p>
-            </div>
-             <div class="content-card">
-                <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-7 h-7 text-yellow-500"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>Skillset Expansion</h3>
-                <p>Allows native teams to gradually adopt Flutter, expanding their skillset and future-proofing development capabilities.</p>
+            <div class="hero-text-content">
+                <h1 class="slide-title">Flutter Add-to-App</h1>
+                <p class="slide-subtitle-main">Seamlessly Integrating Flutter into Existing Applications</p>
+                <p class="slide-subtitle-secondary">A Technical Guide for Modern Development</p>
             </div>
         </div>
     </section>
 
-    <section id="slide3" class="slide bg-gray-200"> <h2 class="slide-title">The Core "How": Technical Pillars</h2>
-        <p class="slide-subtitle">Understanding the key mechanisms for integrating Flutter modules.</p>
+    <section id="slide2" class="slide bg-white">
+        <h2 class="slide-title">The Strategic "Why"</h2>
+        <p class="slide-subtitle">Add-to-app offers specific advantages for evolving existing native codebases with Flutter's power.</p>
         <div class="content-grid">
             <div class="content-card">
-                <h3>Flutter Module & Build Artifacts</h3>
-                <p>A Flutter project of type `module` (`flutter create -t module`) produces specific build artifacts for native integration:</p>
-                <ul>
-                    <li><strong>iOS:</strong> `.xcframework` (includes `Flutter.xcframework`, `App.xcframework`, and plugin frameworks).</li>
-                    <li><strong>Android:</strong> `.aar` (Android Archive).</li>
-                </ul>
-                <p class="mt-2">These are then linked against/included in the native host application.</p>
+                <h3><i class="fas fa-layer-group text-blue-500"></i>Leverage Existing Investment</h3>
+                <p>Preserve stable native features and business logic. Introduce Flutter for new UIs or self-contained feature modules without a full rewrite. Read more on <a href="https://flutter.dev/docs/development/add-to-app" target="_blank" rel="noopener noreferrer">official Add-to-App docs</a>.</p>
             </div>
             <div class="content-card">
-                <h3>FlutterEngine: The Heartbeat</h3>
-                <p>The `FlutterEngine` instance is critical. It hosts your Dart VM, isolates, and runs your Flutter application code.</p>
+                <h3><i class="fas fa-rocket text-green-500"></i>Targeted Modernization</h3>
+                <p>Incrementally replace specific native screens or flows with Flutter, focusing on areas needing UI/UX uplift or faster iteration cycles.</p>
+            </div>
+            <div class="content-card">
+                <h3><i class="fas fa-users-cog text-purple-500"></i>Unified Dev Experience</h3>
+                <p>Utilize Flutter's productive developer experience (hot reload, rich widget set) for new modules, boosting team velocity for those parts.</p>
+            </div>
+             <div class="content-card">
+                <h3><i class="fas fa-chart-line text-yellow-500"></i>Skillset Expansion & Future-Proofing</h3>
+                <p>Allows native teams to gradually adopt Flutter, expanding their skillset and aligning with modern cross-platform development trends.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="slide3" class="slide bg-slate-50">
+        <h2 class="slide-title">The Core "How": Technical Pillars</h2>
+        <p class="slide-subtitle">Understanding the key mechanisms for integrating Flutter modules effectively.</p>
+        <div class="content-grid">
+            <div class="content-card">
+                <h3><i class="fas fa-puzzle-piece text-sky-500"></i>Flutter Module & Artifacts</h3>
+                <p>A Flutter project of type `module` (`flutter create -t module my_flutter`) produces specific build artifacts for native integration:</p>
                 <ul>
-                    <li>Manages the entire lifecycle of a Flutter instance.</li>
-                    <li>**Performance:** Pre-warming and caching an engine via `FlutterEngineCache` is vital for fast "warm starts" of Flutter views.</li>
-                    <li>`FlutterEngineGroup` can be used for multiple, resource-sharing Flutter instances if needed.</li>
+                    <li><strong>iOS:</strong> `.xcframework` (e.g., `Flutter.xcframework`, `App.xcframework`). <a href="https://flutter.dev/docs/development/add-to-app/ios/project-setup" target="_blank" rel="noopener noreferrer">iOS Setup Guide</a>.</li>
+                    <li><strong>Android:</strong> `.aar` (Android Archive). <a href="https://flutter.dev/docs/development/add-to-app/android/project-setup" target="_blank" rel="noopener noreferrer">Android Setup Guide</a>.</li>
+                </ul>
+                <p class="mt-2">These are linked as dependencies in the host native application.</p>
+            </div>
+            <div class="content-card">
+                <h3><i class="fas fa-cogs text-teal-500"></i>FlutterEngine: The Heartbeat</h3>
+                <p>The `FlutterEngine` hosts your Dart VM, isolates, and runs Flutter code. Its management is crucial for performance.</p>
+                <ul>
+                    <li>Pre-warming and caching via <a href="https://api.flutter.dev/flutter/flutter_embedding/FlutterEngineCache-class.html" target="_blank" rel="noopener noreferrer">`FlutterEngineCache`</a> is vital for fast "warm starts".</li>
+                    <li><a href="https://api.flutter.dev/flutter/flutter_embedding/FlutterEngineGroup-class.html" target="_blank" rel="noopener noreferrer">`FlutterEngineGroup`</a> allows multiple, resource-sharing Flutter instances.</li>
                 </ul>
             </div>
             <div class="content-card">
-                <h3>Platform Channels: The Bridge</h3>
-                <p>Enable bi-directional communication between Dart and native (Swift/Kotlin/Java/Obj-C) code.</p>
+                <h3><i class="fas fa-exchange-alt text-indigo-500"></i>Platform Channels: The Bridge</h3>
+                <p>Enable bi-directional communication between Dart and native (Swift/Kotlin) code. <a href="https://flutter.dev/docs/development/platform-integration/platform-channels" target="_blank" rel="noopener noreferrer">Learn about Platform Channels</a>.</p>
                 <ul>
-                    <li><strong>`MethodChannel`</strong>: For invoking methods and receiving results (most common).</li>
-                    <li><strong>`EventChannel`</strong>: For streaming data from native to Dart.</li>
-                    <li><strong>`BasicMessageChannel`</strong>: For simpler, potentially codec-optimized messaging.</li>
-                    <li><strong>Pigeon:</strong> A code-generation tool for type-safe platform channels, reducing boilerplate. Recommended for complex interactions.</li>
+                    <li><strong>`MethodChannel`</strong>: Async method calls (most common).</li>
+                    <li><strong>`EventChannel`</strong>: Streaming data from native to Dart.</li>
+                    <li><strong>`BasicMessageChannel`</strong>: Simpler, potentially codec-optimized messaging.</li>
+                    <li><strong><a href="https://pub.dev/packages/pigeon" target="_blank" rel="noopener noreferrer">Pigeon</a>:</strong> A code-gen tool for type-safe platform channels, reducing boilerplate. Highly recommended.</li>
                 </ul>
             </div>
             <div class="content-card">
-                <h3>Native Embedding APIs</h3>
-                <p>Platform-specific classes provided by Flutter to host and display the Flutter UI within the native app hierarchy.</p>
+                <h3><i class="fas fa-mobile-alt text-rose-500"></i>Native Embedding APIs</h3>
+                <p>Platform-specific classes to host Flutter UI within the native app hierarchy.</p>
                 <ul>
-                    <li><strong>iOS (Swift/Obj-C):</strong> `FlutterViewController` is presented or pushed like any native `UIViewController`.</li>
-                    <li><strong>Android (Kotlin/Java):</strong>
-                        <ul>
-                            <li>`FlutterActivity`: For full-screen Flutter experiences.</li>
-                            <li>`FlutterFragment`: To embed Flutter as part of a native layout.</li>
-                            <li>`FlutterView`: Direct view access (less common for add-to-app).</li>
+                    <li><strong>iOS:</strong> <a href="https://api.flutter.dev/flutter/flutter_embedding/FlutterViewController-class.html" target="_blank" rel="noopener noreferrer">`FlutterViewController`</a>.</li>
+                    <li><strong>Android:</strong>
+                        <ul class="list-disc list-inside ml-4">
+                            <li><a href="https://api.flutter.dev/flutter/flutter_embedding/FlutterActivity-class.html" target="_blank" rel="noopener noreferrer">`FlutterActivity`</a> (full-screen).</li>
+                            <li><a href="https://api.flutter.dev/flutter/flutter_embedding/FlutterFragment-class.html" target="_blank" rel="noopener noreferrer">`FlutterFragment`</a> (partial screen).</li>
                         </ul>
                     </li>
                 </ul>
@@ -259,118 +495,129 @@
         </div>
     </section>
 
-    <section id="slide4" class="slide">
+    <section id="slide4" class="slide bg-white">
         <h2 class="slide-title">Architectural Overview</h2>
         <p class="slide-subtitle">Visualizing the interaction between the native host and the Flutter module.</p>
-        <div class="diagram-placeholder">
-            <p class="font-semibold mb-2">Native Host Application (iOS/Android)</p>
-            <div class="grid grid-cols-2 gap-4 w-full max-w-md mb-2">
-                <div class="border border-gray-400 p-2 rounded">Native UI (Activities/ViewControllers)</div>
-                <div class="border border-gray-400 p-2 rounded">Native Business Logic / SDKs</div>
-            </div>
-            <p class="my-1 text-blue-600 font-bold">&uarr;&darr; Manages & Displays &uarr;&darr;</p>
-            <div class="border-2 border-blue-500 p-3 rounded-lg bg-blue-50 w-full max-w-lg">
-                <p class="font-semibold text-blue-700">Flutter Embedding Layer</p>
-                <p class="text-sm text-blue-600">(`FlutterViewController`, `FlutterActivity`/`Fragment`)</p>
-                <p class="my-1 text-green-600 font-bold">&harr; Hosts &harr;</p>
-                <div class="border border-green-500 p-2 rounded bg-green-50">
-                    <p class="font-semibold text-green-700">FlutterEngine</p>
-                    <p class="text-xs text-green-600">(Cached or new, potentially via FlutterEngineGroup)</p>
-                </div>
-            </div>
-            <p class="my-1 text-purple-600 font-bold">&uarr;&darr; Communication Bridge &uarr;&darr;</p>
-            <div class="border-2 border-purple-500 p-3 rounded-lg bg-purple-50 w-full max-w-lg">
-                <p class="font-semibold text-purple-700">Platform Channels / Pigeon</p>
-                <p class="text-sm text-purple-600">(`MethodChannel`, `EventChannel`, Generated Code)</p>
-            </div>
-             <p class="my-1 text-teal-600 font-bold">&harr; Executes &harr;</p>
-            <div class="border-2 border-teal-500 p-3 rounded-lg bg-teal-50 w-full max-w-lg">
-                <p class="font-semibold text-teal-700">Flutter Module (Dart Code)</p>
-                <p class="text-sm text-teal-600">UI (Widgets), Business Logic, State Management</p>
-            </div>
+        <div class="architecture-diagram-container">
+            <svg viewBox="0 0 600 450" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" class="arrow-head" />
+                    </marker>
+                </defs>
+
+                <rect x="50" y="30" width="500" height="150" fill="#e0f2fe" class="box"/>
+                <text x="300" y="55" text-anchor="middle" class="label">Native Host Application (iOS/Android)</text>
+                
+                <rect x="70" y="80" width="220" height="70" fill="#ffffff" class="box"/>
+                <text x="180" y="105" text-anchor="middle" class="label">Native UI</text>
+                <text x="180" y="125" text-anchor="middle" class="sub-label">(Activities/ViewControllers)</text>
+                
+                <rect x="310" y="80" width="220" height="70" fill="#ffffff" class="box"/>
+                <text x="420" y="105" text-anchor="middle" class="label">Native Business Logic</text>
+                <text x="420" y="125" text-anchor="middle" class="sub-label">(SDKs, Services)</text>
+
+                <rect x="50" y="270" width="500" height="150" fill="#cffafe" class="box"/>
+                <text x="300" y="295" text-anchor="middle" class="label">Flutter Module (Dart)</text>
+
+                <rect x="70" y="320" width="220" height="70" fill="#ffffff" class="box"/>
+                <text x="180" y="345" text-anchor="middle" class="label">Flutter UI</text>
+                <text x="180" y="365" text-anchor="middle" class="sub-label">(Widgets, State)</text>
+
+                <rect x="310" y="320" width="220" height="70" fill="#ffffff" class="box"/>
+                <text x="420" y="345" text-anchor="middle" class="label">Flutter Business Logic</text>
+                <text x="420" y="365" text-anchor="middle" class="sub-label">(Services, Repositories)</text>
+
+                <rect x="150" y="190" width="300" height="70" fill="#fee2e2" class="box"/>
+                <text x="300" y="210" text-anchor="middle" class="label">Integration Layer</text>
+                <text x="300" y="230" text-anchor="middle" class="sub-label">FlutterEngine, Embedding APIs</text>
+                <text x="300" y="245" text-anchor="middle" class="sub-label">Platform Channels / Pigeon</text>
+
+                <line x1="300" y1="180" x2="300" y2="190" class="arrow-line" marker-end="url(#arrowhead)"/>
+                <line x1="300" y1="260" x2="300" y2="270" class="arrow-line" marker-end="url(#arrowhead)"/>
+                
+                <path d="M200 260 Q220 225 250 190" stroke-dasharray="4 2" class="arrow-line" marker-end="url(#arrowhead)" fill="none"/>
+                <path d="M400 260 Q380 225 350 190" stroke-dasharray="4 2" class="arrow-line" marker-end="url(#arrowhead)" fill="none"/>
+            </svg>
         </div>
-        <div class="max-w-3xl mx-auto text-left mt-6 space-y-3 text-gray-700 text-base">
-            <p>The native application instantiates and manages one or more `FlutterEngine` instances. These engines execute Dart code from the Flutter module.</p>
-            <p>Native embedding APIs (`FlutterViewController`, `FlutterActivity`, etc.) are used to render the Flutter UI within the native view hierarchy. These can be launched to display full-screen Flutter experiences or integrated as partial screen elements (especially on Android with `FlutterFragment`).</p>
-            <p>Platform Channels (or Pigeon for type safety) facilitate all communication, enabling data passing, invoking methods, and event streaming between the native and Flutter layers.</p>
+         <div class="max-w-3xl mx-auto text-left mt-6 space-y-3 text-slate-700 text-base">
+            <p>The native app hosts the <a href="https://api.flutter.dev/flutter/flutter_embedding/FlutterEngine-class.html" target="_blank" rel="noopener noreferrer">FlutterEngine</a>, which runs Dart code. Native embedding APIs (like `FlutterViewController` or `FlutterActivity`) display Flutter's UI. Communication flows via <a href="https://flutter.dev/docs/development/platform-integration/platform-channels" target="_blank" rel="noopener noreferrer">Platform Channels</a> or <a href="https://pub.dev/packages/pigeon" target="_blank" rel="noopener noreferrer">Pigeon</a>.</p>
         </div>
     </section>
 
-    <section id="slide5" class="slide bg-gray-200">
-        <h2 class="slide-title">Illustrative POC & Demo Strategy</h2>
+    <section id="slide5" class="slide bg-slate-50">
+        <h2 class="slide-title">Illustrative POC Strategy</h2> 
         <p class="slide-subtitle">A phased approach to demonstrate capability and explore value.</p>
         <div class="content-grid">
             <div class="content-card">
-                <h3>POC: Foundational Integration</h3>
+                <h3><i class="fas fa-flask text-cyan-500"></i>POC: Foundational Integration</h3>
                 <p>Objective: Confirm successful setup, build, and basic interop.</p>
                 <ul>
                     <li>Integrate a simple Flutter module into minimal native iOS & Android hosts.</li>
                     <li>Demonstrate launching a Flutter screen from native.</li>
-                    <li>Implement basic back-navigation (e.g., `SystemNavigator.pop()` or simple platform channel).</li>
-                    <li>Focus on `FlutterEngine` initialization (ideally pre-warmed).</li>
-                    <li>Key Output: Working example, documented setup steps.</li>
+                    <li>Implement basic back-navigation.</li>
+                    <li>Focus on `FlutterEngine` initialization (ideally pre-warmed for performance).</li>
                 </ul>
             </div>
             <div class="content-card">
-                <h3>Demo: Value-Driven Scenario</h3>
+                <h3><i class="fas fa-lightbulb text-amber-500"></i>POC: Value-Driven Scenario</h3> 
                 <p>Objective: Showcase a practical use case with more complex interactions.</p>
                 <p class="font-semibold mt-2">Example: "Native List -> Flutter Detail Screen"</p>
                 <ul>
-                    <li>Native screen displays a list of items.</li>
-                    <li>Tapping an item launches a Flutter screen, passing item ID/data.</li>
-                    <li>Flutter screen displays rich details (potentially fetching more data).</li>
-                    <li>Action in Flutter (e.g., "Save") communicates back to update native state/UI via Platform Channel/Pigeon.</li>
-                    <li>Focus: Data passing, navigation with context, bi-directional updates, Flutter UI capabilities.</li>
+                    <li>Native screen displays a list. Tapping an item launches Flutter, passing data.</li>
+                    <li>Flutter screen displays rich details, potentially fetching more data.</li>
+                    <li>Action in Flutter (e.g., "Favorite") communicates back to update native state/UI.</li>
                 </ul>
             </div>
         </div>
-        <a href="https://github.com/your-repo/your-poc-project" target="_blank" rel="noopener noreferrer" class="button-primary">View Example POC/Demo on GitHub</a>
-        <p class="mt-4 text-sm text-gray-600">(Replace with your actual repository link when available)</p>
+        <a href="https://github.com/flutter/samples/tree/master/add_to_app" target="_blank" rel="noopener noreferrer" class="button-primary">
+            <i class="fab fa-github mr-2"></i> View Official Add-to-App Samples
+        </a>
     </section>
 
-    <section id="slide6" class="slide">
+    <section id="slide6" class="slide bg-white">
         <h2 class="slide-title">Path Forward & Advanced Considerations</h2>
         <div class="max-w-4xl mx-auto space-y-8">
-            <div class="content-card text-left">
-                <h3>Core Implementation Steps</h3>
+            <div class="content-card">
+                <h3><i class="fas fa-tasks text-green-500"></i>Core Implementation Steps</h3>
                 <ol class="list-decimal list-inside space-y-1">
-                    <li>Define clear integration points and features for initial Flutter modules.</li>
+                    <li>Define clear integration points for initial Flutter modules.</li>
                     <li>Establish Flutter module structure and native project configurations.</li>
-                    <li>Implement `FlutterEngine` management strategy (e.g., caching).</li>
-                    <li>Develop Platform Channel / Pigeon contracts for communication.</li>
-                    <li>Thoroughly test navigation, data passing, and lifecycle management across boundaries.</li>
+                    <li>Implement `FlutterEngine` management (e.g., caching via `FlutterEngineCache`).</li>
+                    <li>Develop Platform Channel / <a href="https://pub.dev/packages/pigeon" target="_blank" rel="noopener noreferrer">Pigeon</a> contracts for communication.</li>
+                    <li>Thoroughly test navigation, data passing, and lifecycle management.</li>
                 </ol>
             </div>
             <div class="grid md:grid-cols-2 gap-6">
-                <div class="content-card text-left">
-                    <h3>Key Technical Considerations</h3>
+                <div class="content-card">
+                    <h3><i class="fas fa-tools text-orange-500"></i>Key Technical Considerations</h3>
                     <ul>
-                        <li><strong class="text-blue-600">Engine Lifecycle:</strong> Align FlutterEngine with native component lifecycles.</li>
-                        <li><strong class="text-blue-600">State Synchronization:</strong> Strategies for keeping native and Flutter states consistent if needed.</li>
-                        <li><strong class="text-blue-600">Plugin Conflicts:</strong> Managing potential conflicts if both native and Flutter use similar underlying SDKs.</li>
-                        <li><strong class="text-blue-600">Build & CI/CD:</strong> Integrating Flutter module builds into the main native app pipeline.</li>
+                        <li><strong>Engine Lifecycle:</strong> Align `FlutterEngine` with native component lifecycles.</li>
+                        <li><strong>State Synchronization:</strong> Strategies for consistency if states are shared.</li>
+                        <li><strong>Plugin Conflicts:</strong> Manage potential native SDK conflicts.</li>
+                        <li><strong>Build & CI/CD:</strong> Integrate Flutter module builds into the main native app pipeline. See <a href="https://docs.flutter.dev/deployment/cd" target="_blank" rel="noopener noreferrer">CI/CD for Flutter</a>.</li>
                     </ul>
                 </div>
-                <div class="content-card text-left">
-                    <h3>Advanced Exploration (Future Steps)</h3>
-                    <p>For deeper integration or leveraging existing complex native logic:</p>
+                <div class="content-card">
+                    <h3><i class="fas fa-brain text-violet-500"></i>Advanced Exploration</h3>
+                    <p>For deeper integration or leveraging complex native logic:</p>
                     <ul>
-                        <li><strong>Pigeon:</strong> Strongly consider for robust, type-safe platform channels from the start.</li>
-                        <li><strong>FFIGEN (Dart FFI):</strong> To call existing C/C++ libraries directly from Dart. Useful for reusing native performance-critical code or SDKs.</li>
-                        <li><strong>JNIGEN (via FFI or Pigeon):</strong> To interface with existing Java/Kotlin code more directly than standard method channels, potentially for complex object marshalling or performance-sensitive paths on Android (often involves custom JNI code or tools that generate JNI bindings).</li>
-                        <li><strong>Shared Business Logic in Native:</strong> Explore migrating parts of existing native business logic to be callable from Dart (via FFI/JNI) to avoid rewriting and ensure consistency.</li>
+                        <li><strong><a href="https://flutter.dev/docs/development/platform-integration/c-interop" target="_blank" rel="noopener noreferrer">Dart FFI (ffigen)</a>:</strong> Call C/C++ libraries directly from Dart.</li>
+                        <li><strong>JNI Interop (Android):</strong> For complex Java/Kotlin interaction, often via FFI bridges or custom Pigeon setups. Consider <a href="https://github.com/dart-lang/jnigen" target="_blank" rel="noopener noreferrer">JNIGen</a>.</li>
+                        <li><strong>Native Business Logic Reuse:</strong> Expose existing native logic to Dart to avoid rewrites and ensure consistency.</li>
                     </ul>
                 </div>
             </div>
             <div class="mt-10">
-                <h3 class="text-2xl font-semibold mb-3">Open Discussion</h3>
-                <p class="text-gray-700 text-lg">Identifying opportunities and addressing technical questions for our specific context.</p>
+                <h3 class="text-2xl font-semibold mb-3 text-slate-700">Open Discussion</h3>
+                <p class="text-slate-600 text-lg">Identifying opportunities and addressing technical questions for our specific context.</p>
             </div>
         </div>
     </section>
 
-    <footer class="text-center p-8 bg-gray-800 text-gray-400 text-sm">
+    <footer class="text-center p-10 bg-slate-800 text-slate-400 text-sm">
         Flutter Add-to-App Technical Overview &copy; <span id="year"></span>. [Your Company/Team Name Here]
+        <p class="mt-2">Built with Tailwind CSS &amp; <i class="fas fa-heart text-red-500"></i> for Flutter Integration</p>
     </footer>
 
     <script>
@@ -382,7 +629,6 @@
                 const targetId = this.getAttribute('href');
                 const targetElement = document.querySelector(targetId);
                 if (targetElement) {
-                    // Calculate offset if nav-bar is sticky
                     const navBarHeight = document.querySelector('.nav-bar')?.offsetHeight || 0;
                     const elementPosition = targetElement.getBoundingClientRect().top;
                     const offsetPosition = elementPosition + window.pageYOffset - navBarHeight;
