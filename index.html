@@ -41,13 +41,21 @@
             color: #475569; 
             max-width: 750px; 
         }
+        /* Content Grid with auto-fit for responsiveness */
         .content-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+            grid-template-columns: 1fr; /* Default to 1 column on small screens */
             gap: 2rem; 
             width: 100%;
             max-width: 1200px; 
         }
+        @media (min-width: 768px) { /* md breakpoint */
+            .content-grid {
+                /* auto-fit will create as many columns as can fit with min 320px */
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            }
+        }
+
         .content-card {
             background-color: white;
             padding: 2rem 2.5rem; 
@@ -99,22 +107,53 @@
             color: #1d4ed8; 
             text-decoration: underline;
         }
+        
+        /* Code Snippet Styling with Copy Button */
+        .code-snippet-wrapper {
+            position: relative;
+            margin-top: 0.75rem;
+        }
         .code-snippet {
             background-color: #1e293b; 
             color: #e2e8f0; 
             padding: 1rem 1.25rem; 
+            padding-top: 2.5rem; 
             border-radius: 0.375rem; 
             font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
             font-size: 0.875rem; 
             overflow-x: auto;
             text-align: left;
-            margin-top: 0.75rem; 
             border: 1px solid #334155; 
         }
         .code-snippet code {
             white-space: pre;
         }
-        
+        .copy-code-button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #334155; 
+            color: #cbd5e1; 
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .copy-code-button:hover {
+            background-color: #475569; 
+            color: #f1f5f9; 
+        }
+        .copy-code-button .fa-copy {
+            margin-right: 0.3rem;
+        }
+        .copy-code-button.copied {
+            background-color: #16a34a; 
+            color: white;
+        }
+        /* End Code Snippet Styling */
+
         .nav-bar {
             position: sticky;
             top: 0;
@@ -421,7 +460,7 @@
     <section id="slide2" class="slide bg-white">
         <h2 class="slide-title">The Strategic "Why"</h2>
         <p class="slide-subtitle">Add-to-app offers specific advantages for evolving existing native codebases with Flutter's power.</p>
-        <div class="content-grid">
+        <div class="content-grid why-section-grid"> 
             <div class="content-card">
                 <h3><i class="fas fa-layer-group text-blue-500"></i>Leverage Existing Investment</h3>
                 <p>Preserve stable native features and business logic. Introduce Flutter for new UIs or self-contained feature modules without a full rewrite. Read more on <a href="https://flutter.dev/docs/development/add-to-app" target="_blank" rel="noopener noreferrer">official Add-to-App docs</a>.</p>
@@ -444,7 +483,7 @@
     <section id="slide3" class="slide bg-slate-50">
         <h2 class="slide-title">The Core "How": Technical Pillars</h2>
         <p class="slide-subtitle">Understanding the key mechanisms for integrating Flutter modules effectively.</p>
-        <div class="content-grid md:grid-cols-2 lg:grid-cols-3"> 
+        <div class="content-grid how-section-grid"> 
             <div class="content-card">
                 <h3><i class="fas fa-puzzle-piece text-sky-500"></i>Flutter Module & Artifacts</h3>
                 <p>A Flutter project of type `module` (`flutter create -t module my_flutter`) produces specific build artifacts for native integration:</p>
@@ -456,7 +495,9 @@
             <div class="content-card">
                 <h3><i class="fas fa-cogs text-teal-500"></i>FlutterEngine: The Heartbeat</h3>
                 <p>The `FlutterEngine` hosts your Dart VM, isolates, and runs Flutter code. Its management is crucial for performance. Engines can be pre-warmed (e.g., in Android's <code class="text-xs bg-slate-200 p-1 rounded">MainActivity.kt</code> or iOS's <code class="text-xs bg-slate-200 p-1 rounded">AppDelegate.swift</code>) for optimal performance. Example for Android:</p>
-                <pre class="code-snippet"><code class="language-kotlin">// In your Application class (MyApplication.kt)
+                <div class="code-snippet-wrapper">
+                    <button class="copy-code-button" aria-label="Copy code snippet"><i class="fas fa-copy"></i> Copy</button>
+                    <pre class="code-snippet"><code class="language-kotlin">// In your Application class (MyApplication.kt)
 override fun onCreate() {
     super.onCreate()
     flutterEngine = FlutterEngine(this)
@@ -472,6 +513,7 @@ override fun onCreate() {
 override fun provideFlutterEngine(context: Context): FlutterEngine? {
     return FlutterEngineCache.getInstance().get("my_engine_id")
 }</code></pre>
+                </div>
                 <ul>
                     <li>Pre-warming via <a href="https://api.flutter.dev/flutter/flutter_embedding/FlutterEngineCache-class.html" target="_blank" rel="noopener noreferrer">`FlutterEngineCache`</a> is vital for fast "warm starts".</li>
                     <li><a href="https://api.flutter.dev/flutter/flutter_embedding/FlutterEngineGroup-class.html" target="_blank" rel="noopener noreferrer">`FlutterEngineGroup`</a> for multiple Flutter instances. See <a href="https://github.com/flutter/samples/tree/master_archived/add_to_app/multiple_flutters" target="_blank" rel="noopener noreferrer">Multiple Flutters sample</a>.</li>
@@ -501,11 +543,26 @@ override fun provideFlutterEngine(context: Context): FlutterEngine? {
                 </ul>
             </div>
             <div class="content-card lg:col-span-1 md:col-span-2"> <h3><i class="fas fa-route text-orange-500"></i>Navigation & Initial Data</h3>
-                <p>Passing initial data to a Flutter screen can often be done without immediate `MethodChannel` calls:</p>
+                <p>Pass initial data to Flutter efficiently. For example, on Android, use <code class="text-xs bg-slate-200 p-1 rounded">Intent.putExtra()</code> when launching a `FlutterActivity`. This is often simpler than an immediate `MethodChannel` call for startup parameters (e.g., a movie ID). <a href="https://stackoverflow.com/a/78114892" target="_blank" rel="noopener noreferrer">See example</a>.</p>
+                 <div class="code-snippet-wrapper">
+                    <button class="copy-code-button" aria-label="Copy code snippet"><i class="fas fa-copy"></i> Copy</button>
+                    <pre class="code-snippet"><code class="language-kotlin">// Native Android (Kotlin) - Starting FlutterActivity
+val intent = FlutterActivity
+    .withNewEngine()
+    .initialRoute("/movieDetails?id=myMovieId123") // Option 1: Use initialRoute
+    .build(context)
+// intent.putExtra("movie_id", "myMovieId123") // Option 2: Use Intent extras (requires channel to read)
+startActivity(intent)
+
+// Flutter (Dart) - main.dart or router
+// void main() {
+//   final String initialRoute = WidgetsBinding.instance.window.defaultRouteName;
+//   runApp(MyApp(initialRoute: initialRoute));
+// }
+// Then parse 'initialRoute' in your app's routing logic.
+</code></pre>
                 <ul>
-                    <li><strong>Android:</strong> Pass data via `Intent` extras when starting a `FlutterActivity`. The Flutter side can access these via a specific platform channel (e.g., `getInitialRoute` or custom).</li>
-                    <li><strong>iOS:</strong> Set the `initialRoute` property of `FlutterViewController` (e.g., `/movie?id=123`) or pass data by setting custom properties on your `FlutterViewController` subclass.</li>
-                    <li>Flutter can also pass data back when popped, though this usually involves `MethodChannel` or native fragment result mechanisms.</li>
+                    <li><strong>iOS:</strong> Use `initialRoute` on `FlutterViewController` or set custom properties.</li>
                 </ul>
             </div>
         </div>
@@ -638,6 +695,7 @@ override fun provideFlutterEngine(context: Context): FlutterEngine? {
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
         
+        // Smooth scroll for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -647,13 +705,36 @@ override fun provideFlutterEngine(context: Context): FlutterEngine? {
                     const navBarHeight = document.querySelector('.nav-bar')?.offsetHeight || 0;
                     let elementPosition = targetElement.getBoundingClientRect().top;
                     let offsetPosition = elementPosition + window.pageYOffset - navBarHeight;
-                    if (targetId === '#what') { // Ensure top of #what is shown
+                    if (targetId === '#what') { 
                          offsetPosition = targetElement.offsetTop - navBarHeight;
                     }
         
                     window.scrollTo({
                         top: offsetPosition,
                         behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Copy code snippet functionality
+        document.querySelectorAll('.copy-code-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const codeSnippetWrapper = button.closest('.code-snippet-wrapper');
+                const codeElement = codeSnippetWrapper.querySelector('pre code');
+                if (codeElement) {
+                    const codeToCopy = codeElement.innerText;
+                    navigator.clipboard.writeText(codeToCopy).then(() => {
+                        const originalText = button.innerHTML;
+                        button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        button.classList.add('copied');
+                        setTimeout(() => {
+                            button.innerHTML = originalText;
+                            button.classList.remove('copied');
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Failed to copy text: ', err);
+                        // You could add an error message here
                     });
                 }
             });
