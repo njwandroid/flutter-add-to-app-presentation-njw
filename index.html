@@ -41,17 +41,15 @@
             color: #475569; 
             max-width: 750px; 
         }
-        /* Content Grid with auto-fit for responsiveness */
         .content-grid {
             display: grid;
-            grid-template-columns: 1fr; /* Default to 1 column on small screens */
+            grid-template-columns: 1fr; 
             gap: 2rem; 
             width: 100%;
             max-width: 1200px; 
         }
-        @media (min-width: 768px) { /* md breakpoint */
+        @media (min-width: 768px) { 
             .content-grid {
-                /* auto-fit will create as many columns as can fit with min 320px */
                 grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             }
         }
@@ -108,7 +106,6 @@
             text-decoration: underline;
         }
         
-        /* Code Snippet Styling with Copy Button */
         .code-snippet-wrapper {
             position: relative;
             margin-top: 0.75rem;
@@ -152,7 +149,6 @@
             background-color: #16a34a; 
             color: white;
         }
-        /* End Code Snippet Styling */
 
         .nav-bar {
             position: sticky;
@@ -354,6 +350,33 @@
         .architecture-diagram-container svg .arrow-line { stroke: #60a5fa; stroke-width: 2; }
         .architecture-diagram-container svg .arrow-head { fill: #60a5fa; }
         .architecture-diagram-container svg .box { stroke: #94a3b8; stroke-width: 1.5; rx: 6; }
+        
+        .demo-visual-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: #e2e8f0;
+            border: 2px dashed #cbd5e1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            color: #64748b;
+        }
+        .demo-link-icons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+        .demo-link-icons a {
+            color: #2563eb;
+            font-size: 1.5rem; 
+        }
+        .demo-link-icons a:hover {
+            color: #1d4ed8;
+        }
+
 
         @media (max-width: 768px) {
             #what { 
@@ -419,6 +442,9 @@
             <a href="#slide2" class="nav-link">Why</a>
             <a href="#slide3" class="nav-link">How</a>
             <a href="#slide4" class="nav-link">Arch</a>
+            <a href="#new-io" class="nav-link">New @ I/O</a> 
+            <a href="#web-integration" class="nav-link">Web</a>
+            <a href="#web-workers-serviceworkers" class="nav-link">Web Workers</a> 
             <a href="#slide5" class="nav-link">POC</a> 
             <a href="#slide6" class="nav-link">Next</a>
         </div>
@@ -527,6 +553,7 @@ override fun provideFlutterEngine(context: Context): FlutterEngine? {
                     <li><strong>`MethodChannel`</strong>: Async method calls.</li>
                     <li><strong>`EventChannel`</strong>: Native-to-Dart streams.</li>
                     <li><strong>`BasicMessageChannel`</strong>: Simpler messaging.</li>
+                    <li>For highly performant or direct native API access, explore <strong>Dart FFI (ffigen)</strong> and <strong>JNI (JNIGen)</strong> (see Advanced Exploration).</li>
                 </ul>
             </div>
             <div class="content-card">
@@ -561,6 +588,7 @@ startActivity(intent)
 // }
 // Then parse 'initialRoute' in your app's routing logic.
 </code></pre>
+                </div>
                 <ul>
                     <li><strong>iOS:</strong> Use `initialRoute` on `FlutterViewController` or set custom properties.</li>
                 </ul>
@@ -606,6 +634,126 @@ startActivity(intent)
         </div>
          <div class="max-w-3xl mx-auto text-left mt-6 space-y-3 text-slate-700 text-base">
             <p>The native app hosts the <a href="https://api.flutter.dev/flutter/flutter_embedding/FlutterEngine-class.html" target="_blank" rel="noopener noreferrer">FlutterEngine</a>, which runs Dart code. Native embedding APIs (like `FlutterViewController` or `FlutterActivity`) display Flutter's UI. Communication flows via <a href="https://flutter.dev/docs/development/platform-integration/platform-channels" target="_blank" rel="noopener noreferrer">Platform Channels</a> or <a href="https://pub.dev/packages/pigeon" target="_blank" rel="noopener noreferrer">Pigeon</a>.</p>
+        </div>
+    </section>
+
+    <section id="new-io" class="slide bg-indigo-50">
+        <h2 class="slide-title">New @ I/O: Key Themes</h2>
+        <p class="slide-subtitle">Recent announcements and directions relevant to Flutter & Add-to-App.</p>
+        <div class="content-grid md:grid-cols-2">
+            <div class="content-card">
+                <h3><i class="fas fa-microchip text-purple-600"></i>Enhanced AI Integration</h3>
+                <p>On-device AI (e.g., via Gemini Nano in ML Kit or new native APIs) can enhance the capabilities of the *native host app*. Flutter modules can then interact with these AI-powered native features via platform channels.</p>
+                <ul>
+                    <li>Future Flutter plugins might also provide direct Dart access to such on-device models.</li>
+                    <li>AI in dev tools (e.g., Firebase Studio, "Stitch") can accelerate prototyping for UI modules intended for Add-to-App.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3><i class="fas fa-link text-green-600"></i>Deeper Native Interoperability</h3>
+                <p>Focus on more seamless and performant ways to interact with native platform code, crucial for Add-to-App. This includes advancements and tooling around:</p>
+                <ul>
+                    <li><strong>Dart FFI (Foreign Function Interface):</strong> For calling C-compatible libraries directly. <a href="https://dart.dev/interop/c-interop" target="_blank" rel="noopener noreferrer">Learn more about FFI</a>. The <code class="text-xs bg-slate-200 p-1 rounded">ffigen</code> tool helps generate Dart bindings.</li>
+                    <li><strong>JNI (Java Native Interface) on Android:</strong> For Dart to call Kotlin/Java code. The <a href="https://github.com/dart-lang/jnigen" target="_blank" rel="noopener noreferrer"><code class="text-xs bg-slate-200 p-1 rounded">jnigen</code></a> tool facilitates this by generating Dart and JNI/C bindings.</li>
+                    <li>These mechanisms are key for performance-critical sections or when complex native APIs need direct access, potentially bypassing some platform channel overhead.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3><i class="fab fa-chrome text-orange-500"></i>Web Platform Advancements</h3>
+                <p>Continued improvements for Flutter on the Web, making it a more viable target for Add-to-App scenarios within existing web applications.</p>
+                <ul>
+                    <li><strong>Performance:</strong> Maturation of WebAssembly (WasmGC) for faster load times and execution.</li>
+                    <li><strong>Tooling & DX:</strong> Features like hot reload for web becoming more stable and widespread.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3><i class="fas fa-palette text-red-500"></i>Impeller Rendering Engine</h3>
+                <p>Impeller, as the default renderer on more platforms, ensures consistent high performance and fidelity, which is beneficial for any UI, including those in Add-to-App modules.</p>
+                <ul>
+                    <li>Provides smoother animations and predictable performance, critical for a good user experience when mixing native and Flutter UIs.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="web-integration" class="slide bg-teal-50">
+        <h2 class="slide-title">Web Integration Considerations</h2>
+        <p class="slide-subtitle">Adding Flutter to existing web applications introduces unique aspects.</p>
+        <div class="content-grid md:grid-cols-2 lg:grid-cols-3"> 
+            <div class="content-card">
+                <h3><i class="fas fa-code text-teal-600"></i>Embedding Methods</h3>
+                <ul>
+                    <li><strong>`&lt;iframe&gt;`</strong>: Simple isolation, but communication can be limited.</li>
+                    <li><strong>JavaScript Embedding API (`flutter.js`):</strong> Tighter integration by loading Flutter into a specific `&lt;div&gt;`. See <a href="https://docs.flutter.dev/platform-integration/web/embedding" target="_blank" rel="noopener noreferrer">Embedding Docs</a>.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3><i class="fas fa-comments text-cyan-600"></i>Communication: JS Interop</h3>
+                <p>Use <code class="text-xs bg-slate-200 p-1 rounded">dart:js_interop</code> (modern) or older `dart:js` / `package:js` to call JavaScript functions from Dart and vice-versa.</p>
+            </div>
+            <div class="content-card">
+                <h3><i class="fas fa-sitemap text-blue-600"></i>Routing & Navigation</h3>
+                <p>Coordinate Flutter's internal routing with the host web app's routing, especially with JS embedding. Manage URL changes and history carefully.</p>
+            </div>
+            <div class="content-card">
+                <h3><i class="fas fa-server text-indigo-600"></i>Build & Hosting</h3>
+                <p>`flutter build web` generates static files. Host these alongside your existing web app, ensuring correct asset paths.</p>
+            </div>
+            <div class="content-card"> 
+                <h3><i class="fas fa-cogs text-lime-600"></i>Performance & Wasm</h3>
+                <ul>
+                    <li><strong>WebAssembly (Wasm):</strong> Flutter web can compile to Wasm (with WasmGC) for potentially faster execution and load times. <a href="https://webassembly.org" target="_blank" rel="noopener noreferrer">Learn about Wasm</a> / <a href="https://docs.flutter.dev/platform-integration/web/wasm" target="_blank" rel="noopener noreferrer">Flutter Wasm</a>.</li>
+                    <li>Initial load time is a factor. Choose between CanvasKit (performance) or HTML (compatibility/size) renderers.</li>
+                </ul>
+            </div>
+             <div class="content-card md:col-span-1 lg:col-span-1"> 
+                <h3><i class="fas fa-photo-video text-purple-600"></i>Demo Visuals (Web)</h3>
+                <p>Illustrating web integration:</p>
+                <div class="demo-visual-placeholder mt-2">
+                    <p>[Animated GIF: Web App + Flutter Module Interaction]</p>
+                </div>
+                <div class="demo-link-icons">
+                    <a href="#" title="Expand/Play Video"><i class="fas fa-play-circle"></i></a>
+                    <a href="#" title="View Live Web Demo"><i class="fas fa-external-link-alt"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="web-workers-serviceworkers" class="slide bg-sky-50">
+        <h2 class="slide-title">Web: Workers & PWA Strategy</h2>
+        <p class="slide-subtitle">Understanding background processing and Progressive Web App considerations for Flutter web modules.</p>
+        <div class="content-grid md:grid-cols-2">
+            <div class="content-card">
+                <h3><i class="fas fa-industry text-sky-700"></i>Web Workers</h3>
+                <p>For offloading CPU-intensive tasks from the main UI thread to prevent UI jank in your Flutter web module or the host application.</p>
+                <ul>
+                    <li><strong>Purpose:</strong> True background processing in a separate thread.</li>
+                    <li><strong>Mechanism:</strong> Communicate with the main thread via `postMessage()`. No direct DOM access.</li>
+                    <li><strong>Use Cases:</strong> Complex calculations, data processing, image manipulation.</li>
+                    <li><strong>Flutter Context:</strong> Typically used via JS Interop (<code class="text-xs bg-slate-200 p-1 rounded">dart:js_interop</code>) or through packages abstracting worker communication. <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API" target="_blank" rel="noopener noreferrer">MDN: Web Workers</a>.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3><i class="fas fa-shield-alt text-cyan-700"></i>Service Workers & PWA Strategy</h3>
+                <p>Primarily for enabling Progressive Web App (PWA) features like offline support, caching, and push notifications.</p>
+                <ul>
+                    <li><strong>Flutter's Default Service Worker:</strong> The `flutter_service_worker.js` generated by <code class="text-xs bg-slate-200 p-1 rounded">flutter build web</code> for PWA caching **is deprecated**. It is being phased out due to inflexibility and to give developers more control.</li>
+                    <li><strong>Disabling Default:</strong> Use <code class="text-xs bg-slate-200 p-1 rounded">flutter build web --pwa-strategy=none</code> to prevent its generation. This relies on standard browser HTTP caching.
+                        <ul>
+                            <li><em>When to disable:</em> If PWA features (especially offline caching) are not a primary goal for your embedded Flutter web module, or if you prefer simpler browser caching and control.</li>
+                            <li><em>Disadvantage of disabling:</em> No out-of-the-box PWA caching/offline capabilities without further custom implementation.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Custom Service Worker:</strong> If PWA features are desired, you **must implement your own** service worker.
+                        <ul>
+                            <li>Tools like <a href="https://developer.chrome.com/docs/workbox/" target="_blank" rel="noopener noreferrer">Workbox</a> (a set of JavaScript libraries) can greatly simplify building robust service workers.</li>
+                            <li>For manual implementation, refer to <a href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API" target="_blank" rel="noopener noreferrer">MDN: Service Workers</a> and <a href="https://web.dev/learn/pwa/service-workers/" target="_blank" rel="noopener noreferrer">web.dev Service Worker guides</a>.</li>
+                        </ul>
+                    </li>
+                    <li>See also: <a href="https://docs.flutter.dev/platform-integration/web/faq#how-do-i-configure-a-service-worker" target="_blank" rel="noopener noreferrer">Flutter Web FAQ on Service Workers</a>.</li>
+                </ul>
+            </div>
         </div>
     </section>
 
@@ -672,10 +820,10 @@ startActivity(intent)
                 </div>
                 <div class="content-card">
                     <h3><i class="fas fa-brain text-violet-500"></i>Advanced Exploration</h3>
-                    <p>For deeper integration or leveraging complex native logic:</p>
+                    <p>For deeper integration or leveraging complex native logic. These are becoming increasingly important for complex integrations and maximizing performance by bypassing some channel overhead:</p>
                     <ul>
                         <li><strong><a href="https://flutter.dev/docs/development/platform-integration/c-interop" target="_blank" rel="noopener noreferrer">Dart FFI (ffigen)</a>:</strong> Call C/C++ libraries directly from Dart.</li>
-                        <li><strong>JNI Interop (Android):</strong> For complex Java/Kotlin interaction, often via FFI bridges or custom Pigeon setups. Consider <a href="https://github.com/dart-lang/jnigen" target="_blank" rel="noopener noreferrer">JNIGen</a>.</li>
+                        <li><strong>JNI Interop (Android) with <a href="https://github.com/dart-lang/jnigen" target="_blank" rel="noopener noreferrer">JNIGen</a>:</strong> For complex Java/Kotlin interaction, often via FFI bridges.</li>
                         <li><strong>Native Business Logic Reuse:</strong> Expose existing native logic to Dart to avoid rewrites and ensure consistency.</li>
                     </ul>
                 </div>
@@ -734,7 +882,6 @@ startActivity(intent)
                         }, 2000);
                     }).catch(err => {
                         console.error('Failed to copy text: ', err);
-                        // You could add an error message here
                     });
                 }
             });
